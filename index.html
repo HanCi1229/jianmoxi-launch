@@ -1,0 +1,564 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#29180f">
+  <meta name="description" content="笺墨溪是为散文、小说和诗歌写作者准备的文学写作空间。发现灵感、和小溪 AI 对话、阅读与摘录、写下自己的文章。">
+  <title>笺墨溪 · 把生活写下来</title>
+  <link rel="icon" href="assets/jianmoxi-icon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #30231b;
+      --muted: #6b5547;
+      --paper: #f6f0e6;
+      --rule: #d8c6b2;
+      --brick: #7e392a;
+      --serif: "Songti SC", "Noto Serif SC", SimSun, serif;
+      --ui: system-ui, "Microsoft YaHei", sans-serif;
+      --gutter: clamp(1.25rem, 7vw, 7rem);
+      scroll-behavior: smooth;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 1rem/1.65 var(--ui); }
+    h1, h2, h3, p, blockquote, figure { margin: 0; }
+    h1, h2, h3 { font-family: var(--serif); }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; }
+    [hidden] { display: none !important; }
+    :focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+    .skip { position: fixed; z-index: 5; top: .5rem; left: .5rem; padding: .5rem 1rem; background: var(--paper); transform: translateY(-150%); }
+    .skip:focus { transform: none; }
+    .shell { width: min(100%, 90rem); margin-inline: auto; padding-inline: var(--gutter); }
+    .small-type { font: 500 .69rem/1.5 var(--ui); letter-spacing: .21em; text-transform: uppercase; }
+    .scene-heading { font-size: clamp(2.2rem, 5vw, 4.9rem); line-height: 1.18; letter-spacing: -.05em; font-weight: 600; }
+    .chapter { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.2rem; color: var(--brick); }
+    .chapter::before { content: ""; width: 1.6rem; height: 1px; background: currentColor; }
+    .button {
+      display: inline-flex; align-items: center; justify-content: center; gap: .75rem;
+      min-height: 2.85rem; padding: .55rem 1.05rem; border: 1px solid transparent; border-radius: 4px;
+      background: #f7ead6; color: #321f16; font-size: .9rem; font-weight: 650; cursor: pointer;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .button:hover { background: #fff6e8; }
+    .button:active { background: #e5c8a7; }
+    .button.outline { background: transparent; color: inherit; border-color: #ffffff68; }
+    .button.outline:hover { background: #ffffff24; border-color: currentColor; }
+    .button.outline:active { background: #ffffff38; }
+    .button.dark { background: #77372a; color: #fff5e9; }
+    .button.dark:hover { background: #60291f; }
+    .button.dark:active { background: #482019; }
+
+    .hero { display: grid; grid-template-rows: auto 1fr auto; min-height: 100svh; position: relative; isolation: isolate; color: #fff4e5; background: #29180f; }
+    .hero::before, .ending::before {
+      content: ""; position: absolute; inset: 0; z-index: -2;
+      background: url("assets/autumn-letter-cg.webp") 57% center / cover no-repeat;
+    }
+    .hero::after {
+      content: ""; position: absolute; inset: 0; z-index: -1;
+      background: linear-gradient(90deg, #25180fef 0%, #2d1c13d9 24%, #2e1b11a8 43%, #24150c15 73%),
+        linear-gradient(0deg, #2c1b14e8, transparent 32%, transparent 70%, #24170fc4);
+    }
+    .nav { display: flex; align-items: center; gap: clamp(.65rem, 3vw, 2.75rem); padding-block: 1.15rem; }
+    .nav::after { content: ""; position: absolute; top: 4.9rem; left: var(--gutter); right: var(--gutter); border-top: 1px solid #ffffff42; }
+    .brand { display: flex; align-items: center; gap: .55rem; font: 650 1.25rem/1 var(--serif); white-space: nowrap; margin-right: auto; }
+    .brand img { display: block; width: 1.8rem; height: 1.8rem; }
+    .nav-link { font-size: .85rem; white-space: nowrap; }
+    .nav-link:hover { text-decoration: underline; text-underline-offset: .3em; }
+    .hero-copy { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding-block: clamp(3rem, 9vh, 6rem); }
+    .hero-copy .small-type { color: #ffdaaf; }
+    .hero h1 { font-size: clamp(4rem, 9.3vw, 9rem); line-height: 1.04; font-weight: 650; letter-spacing: .02em; margin: .55rem 0 .7rem; }
+    .hero-tag { font: 600 clamp(1.4rem, 3vw, 2.6rem)/1.4 var(--serif); letter-spacing: .09em; }
+    .hero-note { margin-top: 1.45rem; max-width: 25rem; color: #f2e3d0; font-size: clamp(.94rem, 1.3vw, 1.11rem); }
+    .actions { display: flex; align-items: center; flex-wrap: wrap; gap: .65rem; margin-top: 1.7rem; }
+    .chapter-index { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; padding-bottom: clamp(1rem, 4vh, 2.25rem); }
+    .chapter-index a {
+      display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: .6rem;
+      min-height: 3.5rem; padding: .55rem clamp(.65rem, 2vw, 1.2rem);
+      border-top: 1px solid #f6ddbb70; background: #26180e85; transition: background .2s;
+    }
+    .chapter-index a:hover { background: #5d3526eb; }
+    .chapter-index small { color: #ffd2a7; }
+    .chapter-index strong { font: 650 clamp(1rem, 1.6vw, 1.26rem)/1.2 var(--serif); }
+    .chapter-index a > span { color: #ffd2a7; }
+    @media (prefers-reduced-motion: no-preference) {
+      .hero-copy > * { animation: enter .75s both; }
+      .hero-copy > :nth-child(2) { animation-delay: .07s; }
+      .hero-copy > :nth-child(3) { animation-delay: .13s; }
+      .hero-copy > :nth-child(4) { animation-delay: .19s; }
+      .hero-copy > :nth-child(5) { animation-delay: .25s; }
+      @keyframes enter { from { opacity: 0; transform: translateY(.85rem); } }
+    }
+
+    .feature { padding-block: clamp(3.5rem, 7vw, 7rem); }
+    .feature .shell { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); align-items: center; gap: clamp(2rem, 6vw, 6rem); }
+    .feature .scene-heading { font-size: clamp(2.15rem, 4.4vw, 4.25rem); }
+    .feature:nth-of-type(even) .feature-intro { order: 2; }
+    .section-copy { color: var(--muted); margin-top: 1.25rem; max-width: 24rem; }
+    .feature-actions { display: flex; flex-wrap: wrap; gap: .45rem 1.1rem; padding: 0; margin: 1.1rem 0 0; list-style: none; color: var(--muted); font-size: .85rem; }
+    .feature-actions li::before { content: "·"; color: var(--brick); margin-right: .35rem; font-weight: 750; }
+    .demo { background: #fffaf3; border: 1px solid var(--rule); box-shadow: .45rem .55rem 0 #eadbcc; border-radius: 5px; min-width: 0; }
+    .demo-top { display: flex; justify-content: space-between; gap: .75rem; padding: .9rem clamp(.95rem, 2.2vw, 1.7rem); border-bottom: 1px solid var(--rule); }
+    .demo-top strong { font-family: var(--serif); }
+    .demo-top .small-type { align-self: center; color: var(--muted); letter-spacing: .11em; }
+    .demo-sheet { padding: clamp(1rem, 2.5vw, 2rem); }
+    .demo-sheet blockquote { font: 500 clamp(1.04rem, 1.8vw, 1.37rem)/1.9 var(--serif); padding-left: 1rem; border-left: 2px solid #b4785d; margin-bottom: 1.25rem; }
+    .demo-modes { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .demo-modes button { min-height: 2.75rem; padding: .35rem .65rem; border: 1px solid var(--rule); border-radius: 4px; background: transparent; color: var(--ink); font-size: .85rem; cursor: pointer; }
+    .demo-modes button:hover { background: #f4e6d7; }
+    .demo-modes button[aria-pressed="true"] { background: #ecd8c4; border-color: #c9a489; font-weight: 650; }
+    .demo-question { margin: .9rem 0; color: var(--muted); }
+    .demo-answer { margin-top: 1rem; padding-top: .85rem; border-top: 1px solid var(--rule); }
+    .demo-answer strong { display: block; margin-bottom: .3rem; color: var(--brick); font-size: .82rem; }
+    .demo .actions { margin-top: 1rem; }
+    .demo .button.outline { border-color: #c5a58c; color: var(--brick); }
+    .demo .button.outline:hover { background: #f4e6d7; }
+    .demo .button.outline[aria-pressed="true"] { background: #ecd8c4; border-color: #c9a489; }
+    .inspiration { background: #efe3d3; }
+    .inspiration .demo { box-shadow: .45rem .55rem 0 #dac3ab; }
+    .inspiration-art { min-height: clamp(8.5rem, 18vw, 13.5rem); background: url("assets/autumn-letter-cg.webp") center 64% / cover; }
+    .inspiration blockquote { margin-block: 1rem .35rem; }
+    .source { color: var(--muted); font-size: .83rem; }
+    .inspiration .demo-question { margin-bottom: 0; }
+    .companion { background: #34221a; color: #f9ebda; }
+    .companion .chapter, .companion .feature-actions li::before { color: #f2b894; }
+    .companion .section-copy, .companion .feature-actions { color: #e8cfba; }
+    .companion .demo { color: var(--ink); box-shadow: .45rem .55rem 0 #af806254; }
+    .reading { background: #f7f0e3; }
+    .reader-sheet { position: relative; padding-left: clamp(1rem, 4vw, 2.6rem); }
+    .reader-sheet h3 { margin-top: .9rem; font-size: clamp(1.6rem, 3vw, 2.5rem); }
+    .reader-sheet blockquote { border: 0; padding: 0; margin: .7rem 0 0; }
+    .reader-sheet mark { background: #f2d6aa; color: inherit; }
+    .writing { background: #eadbcc; }
+    .writing .demo { box-shadow: .45rem .55rem 0 #c9ad94; }
+    .draft { padding-top: 0; }
+    .draft-format { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; padding-block: .65rem; border-bottom: 1px solid var(--rule); color: var(--muted); font-size: .85rem; }
+    .draft-format select { min-height: 2.2rem; padding: .15rem .35rem; border: 1px solid var(--rule); border-radius: 4px; background: transparent; color: var(--ink); font: inherit; }
+    .draft-format span { margin-left: auto; }
+    .draft input, .draft textarea { display: block; width: 100%; color: var(--ink); background: transparent; border: 0; padding: .35rem 0; }
+    .draft input { margin: .8rem 0 .35rem; font: 650 clamp(1.5rem, 3vw, 2rem)/1.35 var(--serif); }
+    .draft textarea { min-height: 7rem; resize: vertical; font: var(--draft-size, 17px)/1.8 var(--draft-font, var(--serif)); }
+    .draft :is(input, textarea):focus-visible { outline: none; box-shadow: 0 2px var(--brick); }
+    .draft-start { margin: 0 0 .45rem; color: var(--brick); font-size: .85rem; }
+    .draft .actions { border-top: 1px solid var(--rule); padding-top: .8rem; }
+
+    .gallery { padding-block: clamp(3.75rem, 8vw, 7rem); background: #271b16; color: #fff1df; }
+    .gallery .chapter { color: #e5b492; }
+    .gallery .section-copy { color: #e0cbbb; margin: 0; }
+    .gallery-intro { display: flex; align-items: end; justify-content: space-between; gap: 1.4rem; margin-bottom: 1.65rem; }
+    .skin-stage {
+      display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.05fr); gap: clamp(1.4rem, 4vw, 4rem); align-items: end;
+      min-height: clamp(24rem, 46vw, 38rem); position: relative; isolation: isolate; overflow: hidden;
+      padding: clamp(1.4rem, 4vw, 3.5rem); border: 1px solid #ffffff4f; border-radius: 5px;
+      background: #493227; color: #fff6ec;
+    }
+    .skin-stage::before, .skin-stage::after { content: ""; position: absolute; inset: 0; z-index: -1; }
+    .skin-stage::before { background: var(--art) var(--position, center) / cover no-repeat; }
+    .skin-stage::after { background: var(--shade, linear-gradient(0deg, #190f0de8, #26170d58 57%, transparent)); }
+    .skin-stage[data-skin="autumn"] { --art: url("assets/autumn-letter-cg.webp"); --paper-skin: #fff1dd; --ink-skin: #38251b; }
+    .skin-stage[data-skin="ink"] { --art: url("assets/misty-jianghu-cg.webp"); --paper-skin: #dbe3dd; --ink-skin: #20382f; --position: 50% 40%; }
+    .skin-stage[data-skin="sword"] { --art: url("assets/jianghu-rain-crossing.webp"); --paper-skin: #22312f; --ink-skin: #fcf0de; --position: 50% 34%; }
+    .skin-stage[data-skin="weekly"] { --art: url("assets/weekly-editorial-cg.webp"); --paper-skin: #fffdf6; --ink-skin: #151515; --position: 50% 40%; }
+    .skin-stage[data-skin="classic"] { --art: linear-gradient(140deg, #d5c7ad, #9a806a); --paper-skin: #f8f6ee; --ink-skin: #343127; --shade: linear-gradient(0deg, #35271fdf, transparent 74%); }
+    .skin-stage h3 { font-size: clamp(2.1rem, 4.8vw, 4.35rem); line-height: 1.14; margin-block: .4rem; }
+    .skin-details { max-width: 21rem; }
+    .skin-details p:last-child { color: #fff0e2; }
+    .sample-page { justify-self: end; width: min(100%, 26rem); padding: clamp(1.1rem, 3vw, 2.3rem); border: 1px solid #fff6e565; border-radius: 4px; background: var(--paper-skin); color: var(--ink-skin); box-shadow: 0 .8rem 2.4rem #100a0870; }
+    .sample-page figcaption { padding-bottom: .65rem; border-bottom: 1px solid currentColor; margin-bottom: .75rem; }
+    .sample-page blockquote { font: 500 clamp(1.13rem, 2.25vw, 1.55rem)/1.65 var(--serif); }
+    .skin-controls { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: 1rem; }
+    .skin-controls button {
+      display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .5rem .8rem;
+      border: 1px solid #b89c8799; border-radius: 4px; background: transparent; color: inherit; font-size: .88rem; cursor: pointer;
+    }
+    .skin-controls button::before { content: ""; width: .67rem; height: .67rem; background: var(--swatch); border-radius: 50%; border: 1px solid currentColor; }
+    .skin-controls button:hover { background: #ffffff1e; }
+    .skin-controls button[aria-pressed="true"] { background: #f5e7d6; color: #32221a; border-color: #f5e7d6; font-weight: 650; }
+
+    .ending { position: relative; isolation: isolate; color: #fff4e5; padding-block: clamp(4rem, 10vw, 8.5rem); background: #29180f; }
+    .ending::before { background-position: center 76%; }
+    .ending::after { content: ""; position: absolute; inset: 0; z-index: -1; background: #25170ecc; }
+    .ending .chapter { color: #f0c4a4; }
+    .ending .scene-heading { max-width: 12em; }
+    .ending .section-copy { color: #f5e2d0; }
+    footer { background: #251914; color: #e6cfb8; padding-block: 1.05rem; }
+    footer .shell { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .65rem; }
+    footer a:hover { text-decoration: underline; text-underline-offset: .3em; }
+
+    @media (max-width: 760px) {
+      .feature .shell, .skin-stage { grid-template-columns: 1fr; }
+      .feature:nth-of-type(even) .feature-intro { order: 0; }
+      .skin-stage { align-content: end; gap: .85rem; }
+      .sample-page { justify-self: start; width: min(100%, 22rem); }
+      .gallery-intro { align-items: start; flex-direction: column; }
+      .hero::after { background: linear-gradient(90deg, #26180edb, #26180e61), linear-gradient(0deg, #24160de8, transparent 50%, #25160c9e); }
+    }
+    @media (max-width: 480px) {
+      .nav { padding-block: .85rem; }
+      .nav::after { top: 4.35rem; }
+      .nav-link { display: none; }
+      .chapter-index { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .chapter-index a { min-height: 2.7rem; }
+      .skin-controls { gap: .45rem; }
+      .skin-controls button { padding-inline: .6rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      :root { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body id="top">
+  <a class="skip" href="#main">跳到主要内容</a>
+  <main id="main">
+    <section class="hero" aria-labelledby="title">
+      <nav class="shell nav" aria-label="发布页导航">
+        <a class="brand" href="#top"><img src="assets/jianmoxi-icon.svg" width="29" height="29" alt="">笺墨溪</a>
+        <a class="nav-link" href="#spaces">四个空间</a>
+        <a class="nav-link" href="#appearance">外观皮肤</a>
+        <a class="button outline" href="https://49.234.43.25/web/index.html">打开网页版 <span aria-hidden="true">↗</span></a>
+      </nav>
+      <div class="shell hero-copy">
+        <p class="small-type">JIANMOXI / 秋日来信</p>
+        <h1 id="title">笺墨溪</h1>
+        <p class="hero-tag">把生活写下来</p>
+        <p class="hero-note">文学是有温度的事情，而笺墨溪就是让这件事更智能。</p>
+        <div class="actions">
+          <a class="button" href="#inspiration">探索四个空间 <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+      <nav class="shell chapter-index" id="spaces" aria-label="四个产品板块">
+        <a href="#inspiration"><small class="small-type">01</small><strong>灵感</strong><span aria-hidden="true">↘</span></a>
+        <a href="#companion"><small class="small-type">02</small><strong>对话</strong><span aria-hidden="true">↘</span></a>
+        <a href="#reading"><small class="small-type">03</small><strong>阅读</strong><span aria-hidden="true">↘</span></a>
+        <a href="#articles"><small class="small-type">04</small><strong>文章</strong><span aria-hidden="true">↘</span></a>
+      </nav>
+    </section>
+
+    <section id="inspiration" class="feature inspiration" aria-labelledby="inspiration-title">
+      <div class="shell">
+        <div class="feature-intro">
+          <p class="chapter small-type">01 / 灵感</p>
+          <h2 class="scene-heading" id="inspiration-title">从一句话，<br>想到自己的生活。</h2>
+          <p class="section-copy">有时想写，却不知道从哪里起笔。按主题读几句有出处的文字，收藏打动你的那句，或者带着它去写一篇。</p>
+          <ul class="feature-actions"><li>按主题发现</li><li>查看出处</li><li>收藏灵感</li></ul>
+        </div>
+        <div class="demo">
+          <div class="inspiration-art" aria-hidden="true"></div>
+          <div class="demo-top"><strong>发现灵感</strong><span class="small-type">互动示例</span></div>
+          <div class="demo-sheet">
+            <div class="demo-modes" role="group" aria-label="灵感主题">
+              <button type="button" data-seed="time" aria-pressed="true">时间</button>
+              <button type="button" data-seed="memory" aria-pressed="false">牵挂</button>
+            </div>
+            <div aria-live="polite">
+              <blockquote id="seed-quote">燕子去了，有再来的时候；杨柳枯了，有再青的时候；桃花谢了，有再开的时候。</blockquote>
+              <p class="source" id="seed-source">朱自清《匆匆》节选</p>
+              <p class="demo-question" id="seed-prompt">想想最近一次察觉时间过去的瞬间。你先看到了什么？</p>
+            </div>
+            <div class="actions">
+              <button class="button outline" type="button" id="save-seed" aria-pressed="false">收藏灵感</button>
+              <a class="button dark" id="write-seed" href="#articles">带着这句去写 <span aria-hidden="true">↘</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="companion" class="feature companion" aria-labelledby="ai-title">
+      <div class="shell">
+        <div class="feature-intro">
+          <p class="chapter small-type">02 / 对话</p>
+          <h2 class="scene-heading" id="ai-title">有些感受，<br>聊着聊着才说得清。</h2>
+          <p class="section-copy">把喜欢的句子或正在写的稿子带进对话。小溪可以陪你细读、发问，聊聊你想留下的情绪和读者可能读到的东西。</p>
+          <ul class="feature-actions"><li>围绕原文讨论</li><li>关联正在写的文章</li><li>回看历史对话</li></ul>
+        </div>
+        <div class="demo">
+          <div class="demo-top"><strong>和小溪聊文字</strong><span class="small-type">示例演示 · 预设回应</span></div>
+          <div class="demo-sheet">
+            <blockquote id="chat-context">风把一枚叶子送到窗台，我把秋天夹进信里。</blockquote>
+            <div class="demo-modes" role="group" aria-label="选择想聊的角度">
+              <button type="button" data-mode="reading" aria-pressed="true">解读一句</button>
+              <button type="button" data-mode="idea" aria-pressed="false">找些灵感</button>
+              <button type="button" data-mode="revision" aria-pressed="false">讨论修改</button>
+            </div>
+            <p class="demo-question" id="demo-question">为什么读到「夹进信里」，我会想到一个具体的人？</p>
+            <button class="button dark" type="button" id="show-answer" aria-controls="demo-answer" aria-expanded="false">看小溪的回应 <span aria-hidden="true">↗</span></button>
+            <div class="demo-answer" id="demo-answer" hidden>
+              <strong>小溪 · 示例</strong>
+              <p id="answer-text">写到「信」，一片落叶就有了去处。你没写收信人的名字，读到这里的人却可能想起自己想寄信的人。这处空白可以留着。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="reading" class="feature reading" aria-labelledby="reading-title">
+      <div class="shell">
+        <div class="feature-intro">
+          <p class="chapter small-type">03 / 阅读</p>
+          <h2 class="scene-heading" id="reading-title">读到想停下的地方，<br>就停一会儿。</h2>
+          <p class="section-copy">从书库找作品，读完整篇。遇到舍不得划过去的一句，可以摘录，或带着作品和出处去问小溪。</p>
+          <ul class="feature-actions"><li>按作品、作者或正文搜索</li><li>收藏作品</li><li>选段摘录与讨论</li></ul>
+        </div>
+        <div class="demo">
+          <div class="demo-top"><strong>阅读书库</strong><span class="small-type">作品节选 · 互动示例</span></div>
+          <div class="demo-sheet reader-sheet">
+            <div class="demo-modes" role="group" aria-label="选择试读作品">
+              <button type="button" data-work="time" aria-pressed="true">匆匆</button>
+              <button type="button" data-work="memory" aria-pressed="false">背影</button>
+            </div>
+            <div aria-live="polite">
+              <h3 id="work-title">匆匆</h3>
+              <p class="source">朱自清 · 散文</p>
+              <blockquote><mark id="work-selection">燕子去了，有再来的时候；杨柳枯了，有再青的时候；桃花谢了，有再开的时候。</mark><span id="work-follow">但是，聪明的，你告诉我，我们的日子为什么一去不复返呢？</span></blockquote>
+            </div>
+            <div class="actions">
+              <button class="button outline" type="button" id="save-excerpt" aria-pressed="false">摘录选段</button>
+              <a class="button dark" id="discuss-excerpt" href="#companion">和小溪聊选段 <span aria-hidden="true">↗</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="articles" class="feature writing" aria-labelledby="articles-title">
+      <div class="shell">
+        <div class="feature-intro">
+          <p class="chapter small-type">04 / 文章</p>
+          <h2 class="scene-heading" id="articles-title">慢慢写，<br>把想说的留在纸上。</h2>
+          <p class="section-copy">在写作页里专心写，草稿可以接着改。卡住时把这篇交给小溪一起聊，满意以后标为完成，或导出一份自己的副本。</p>
+          <ul class="feature-actions"><li>标题与正文</li><li>字体、字号和加粗</li><li>草稿、云端同步与导出</li></ul>
+        </div>
+        <div class="demo">
+          <div class="demo-top"><strong>我的文章</strong><span class="small-type">互动示例 · 仅当前页面</span></div>
+          <div class="demo-sheet draft">
+            <div class="draft-format">
+              <label>字体 <select id="draft-font"><option value="serif">宋体</option><option value="ui">黑体</option></select></label>
+              <label>字号 <select id="draft-size"><option>15</option><option selected>17</option><option>20</option><option>24</option></select></label>
+              <span id="draft-state" role="status">草稿</span>
+            </div>
+            <input type="text" id="draft-title" aria-label="文章标题" value="写给秋天的一封信" maxlength="80">
+            <p class="draft-start" id="draft-seed" role="status" hidden></p>
+            <textarea id="draft-body" aria-label="文章正文" rows="3" maxlength="1500" placeholder="从一个记得最清楚的细节开始……">风把一枚叶子送到窗台，我把秋天夹进信里。</textarea>
+            <div class="actions">
+              <button class="button outline" type="button" id="complete-draft">标为完成</button>
+              <output class="source" id="draft-count" for="draft-body"></output>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="appearance" class="gallery" aria-labelledby="skin-title">
+      <div class="shell">
+        <div class="gallery-intro">
+          <div>
+            <p class="chapter small-type">05 / 外观皮肤</p>
+            <h2 class="scene-heading" id="skin-title">换一处地方写。</h2>
+          </div>
+          <p class="section-copy">选一套皮肤，看看同一段文字在不同的写作空间里是什么样子。</p>
+        </div>
+        <div class="skin-stage" id="skin-stage" data-skin="autumn">
+          <div class="skin-details" aria-live="polite">
+            <p class="small-type" id="skin-edition">01 / AUTUMN POST</p>
+            <h3 id="skin-name">秋日来信</h3>
+            <p id="skin-caption">枫窗、落日与远方的信</p>
+          </div>
+          <figure class="sample-page">
+            <figcaption class="small-type">一页手稿 · 同一段文字</figcaption>
+            <blockquote>风把一枚叶子送到窗台，我把秋天夹进信里。</blockquote>
+          </figure>
+        </div>
+        <div class="skin-controls" role="group" aria-label="切换预览皮肤">
+          <button type="button" data-preview="autumn" aria-controls="skin-stage" aria-pressed="true" style="--swatch:#b66b3c">秋日来信</button>
+          <button type="button" data-preview="ink" aria-controls="skin-stage" aria-pressed="false" style="--swatch:#6a847d">烟雨楼</button>
+          <button type="button" data-preview="sword" aria-controls="skin-stage" aria-pressed="false" style="--swatch:#283b38">剑照山河</button>
+          <button type="button" data-preview="weekly" aria-controls="skin-stage" aria-pressed="false" style="--swatch:#f5f2e9">笺墨周刊</button>
+          <button type="button" data-preview="classic" aria-controls="skin-stage" aria-pressed="false" style="--swatch:#cdbfa7">经典纸笺</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="ending" aria-labelledby="start-title">
+      <div class="shell">
+        <p class="chapter small-type">06 / 开始写作</p>
+        <h2 class="scene-heading" id="start-title">今天，<br>有什么值得写下来？</h2>
+        <p class="section-copy">为散文、小说和诗歌写作者准备的写作空间。</p>
+        <div class="actions">
+          <a class="button" href="https://49.234.43.25/web/index.html">打开网页版 <span aria-hidden="true">↗</span></a>
+          <a class="button outline" href="https://49.234.43.25/downloads/jianmoxi-0.1.3.apk">下载安卓 App <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer><div class="shell small-type"><span>笺墨溪 / JIANMOXI</span><a href="#top">回到页首 ↑</a></div></footer>
+  <script>
+    const demoWorks = {
+      time: {
+        title: '匆匆',
+        selection: '燕子去了，有再来的时候；杨柳枯了，有再青的时候；桃花谢了，有再开的时候。',
+        following: '但是，聪明的，你告诉我，我们的日子为什么一去不复返呢？',
+        prompt: '想想最近一次察觉时间过去的瞬间。你先看到了什么？',
+        conversation: {
+          reading: ['为什么开头写了三样会再来的东西？', '燕子、杨柳和桃花都能回来，人的日子却回不来。前半段读起来像在数节气，后面的追问一下子把目光转到了自己身上。'],
+          idea: ['我也想写一点对时间的感受，可以从哪儿想起？', '想一个还会照常发生的小事，比如每年都有人晒被子。再想那件小事里有什么已经变了，你什么时候才发觉？'],
+          revision: ['如果我写一段自己的文字，也要用三句排比吗？', '可以先听听你想要的节奏。如果想写反复等待，重复也许很贴切。如果只想让读者停在一个瞬间，挑一个细节写深一点也可以。']
+        }
+      },
+      memory: {
+        title: '背影',
+        selection: '我与父亲不相见已二年馀了，我最不能忘记的是他的背影。',
+        following: '那年冬天，祖母死了，父亲的差使也交卸了，正是祸不单行的日子，我从北京到徐州，打算跟着父亲奔丧回家。',
+        prompt: '想起一个牵挂的人时，最先浮现的是他的哪一个动作？',
+        conversation: {
+          reading: ['为什么记住的是背影？', '背影是离开时还能看见的东西，也暗含两个人之间的距离。开头先说忘不掉，读者会想知道，这个平常的画面为什么能在心里留那么久。'],
+          idea: ['如果也想写牵挂，可以从什么地方想起？', '回想一次很平常的分别。那个人走出去之前最后做了什么？你当时有没有留意，后来又为什么想起来？'],
+          revision: ['写这种回忆时，要不要先交代我有多想念？', '可以试着先放下解释，读一遍只留动作的版本。如果那一幕已经能让你想起当时的感受，就给它多一点空间。']
+        }
+      }
+    };
+    const byId = id => document.getElementById(id);
+
+    function selectChoice(choices, selected) {
+      for (const choice of choices) choice.setAttribute('aria-pressed', String(choice === selected));
+    }
+
+    function showSaved(button, saved, labels) {
+      button.setAttribute('aria-pressed', String(saved));
+      button.textContent = labels[Number(saved)];
+    }
+
+    const seedChoices = [...document.querySelectorAll('[data-seed]')];
+    const seedSave = byId('save-seed');
+    const savedSeeds = new Set();
+    let activeSeed = 'time';
+    for (const choice of seedChoices) {
+      choice.addEventListener('click', () => {
+        activeSeed = choice.dataset.seed;
+        const work = demoWorks[activeSeed];
+        selectChoice(seedChoices, choice);
+        byId('seed-quote').textContent = work.selection;
+        byId('seed-source').textContent = '朱自清《' + work.title + '》节选';
+        byId('seed-prompt').textContent = work.prompt;
+        showSaved(seedSave, savedSeeds.has(activeSeed), ['收藏灵感', '已收藏']);
+      });
+    }
+    seedSave.addEventListener('click', () => {
+      const saved = !savedSeeds.delete(activeSeed);
+      if (saved) savedSeeds.add(activeSeed);
+      showSaved(seedSave, saved, ['收藏灵感', '已收藏']);
+    });
+
+    const workChoices = [...document.querySelectorAll('[data-work]')];
+    const excerptSave = byId('save-excerpt');
+    const excerpts = new Set();
+    let activeWork = 'time';
+    for (const choice of workChoices) {
+      choice.addEventListener('click', () => {
+        activeWork = choice.dataset.work;
+        const work = demoWorks[activeWork];
+        selectChoice(workChoices, choice);
+        byId('work-title').textContent = work.title;
+        byId('work-selection').textContent = work.selection;
+        byId('work-follow').textContent = work.following;
+        showSaved(excerptSave, excerpts.has(activeWork), ['摘录选段', '已摘录']);
+      });
+    }
+    excerptSave.addEventListener('click', () => {
+      const saved = !excerpts.delete(activeWork);
+      if (saved) excerpts.add(activeWork);
+      showSaved(excerptSave, saved, ['摘录选段', '已摘录']);
+    });
+
+    const defaultModes = {
+      reading: ['为什么读到「夹进信里」，我会想到一个具体的人？', '写到「信」，一片落叶就有了去处。你没写收信人的名字，读到这里的人却可能想起自己想寄信的人。这处空白可以留着。'],
+      idea: ['如果往下写，可以从哪个细节开始？', '想一想这封信会在哪里被拆开。比如收信人是在一个很暖的房间里，还是在一扇一直漏风的窗边？这个差别可能决定他先读信，还是先看那片叶子。'],
+      revision: ['「夹进信里」要不要换成「寄给你」？', '「夹进信里」把情绪留在手上的动作里。「寄给你」会让思念更直接，也会带出一个明确的收信人。看你希望读者先看到那片叶子，还是先想到那个「你」。']
+    };
+    const modeButtons = [...document.querySelectorAll('[data-mode]')];
+    const question = byId('demo-question');
+    const answer = byId('demo-answer');
+    const answerText = byId('answer-text');
+    const answerButton = byId('show-answer');
+    let modes = defaultModes;
+
+    function setAnswerVisibility(visible) {
+      answer.hidden = !visible;
+      answerButton.setAttribute('aria-expanded', String(visible));
+      answerButton.firstChild.textContent = visible ? '收起小溪的回应 ' : '看小溪的回应 ';
+    }
+
+    function showMode(button) {
+      selectChoice(modeButtons, button);
+      const [prompt, response] = modes[button.dataset.mode];
+      question.textContent = prompt;
+      answerText.textContent = response;
+      setAnswerVisibility(false);
+    }
+
+    for (const button of modeButtons) {
+      button.addEventListener('click', () => showMode(button));
+    }
+    answerButton.addEventListener('click', () => setAnswerVisibility(answer.hidden));
+    byId('discuss-excerpt').addEventListener('click', () => {
+      const work = demoWorks[activeWork];
+      modes = work.conversation;
+      byId('chat-context').textContent = work.selection + ' —— 朱自清《' + work.title + '》';
+      showMode(modeButtons[0]);
+    });
+
+    const draftBody = byId('draft-body');
+    const draftCount = byId('draft-count');
+    function updateDraftCount() {
+      draftCount.textContent = [...draftBody.value.replace(/\s/g, '')].length + ' 字';
+    }
+    draftBody.addEventListener('input', updateDraftCount);
+    updateDraftCount();
+    byId('draft-font').addEventListener('change', event => {
+      draftBody.style.setProperty('--draft-font', 'var(--' + event.target.value + ')');
+    });
+    byId('draft-size').addEventListener('change', event => {
+      draftBody.style.setProperty('--draft-size', event.target.value + 'px');
+    });
+    byId('complete-draft').addEventListener('click', event => {
+      const status = byId('draft-state');
+      const completing = status.textContent === '草稿';
+      status.textContent = completing ? '已完成' : '草稿';
+      event.currentTarget.textContent = completing ? '标回草稿' : '标为完成';
+    });
+    byId('write-seed').addEventListener('click', () => {
+      const work = demoWorks[activeSeed];
+      const draftSeed = byId('draft-seed');
+      draftSeed.textContent = '写作起点 · 朱自清《' + work.title + '》 · ' + work.prompt;
+      draftSeed.hidden = false;
+    });
+
+    const skins = {
+      autumn: ['01 / AUTUMN POST', '枫窗、落日与远方的信'],
+      ink: ['02 / THE MISTY TOWER', '宣纸墨痕，雨中山河'],
+      sword: ['江湖卷 / 雨渡', '执剑渡雨，烟雨江湖'],
+      weekly: ['LITERARY WEEKLY / NO. 04', '白纸黑字，黑白动漫封面'],
+      classic: ['CLASSIC / PAPER', '素纸与墨色，安静的写作底色']
+    };
+    const skinButtons = [...document.querySelectorAll('[data-preview]')];
+    const stage = document.getElementById('skin-stage');
+    const skinEdition = document.getElementById('skin-edition');
+    const skinName = document.getElementById('skin-name');
+    const skinCaption = document.getElementById('skin-caption');
+
+    for (const button of skinButtons) {
+      button.addEventListener('click', () => {
+        if (stage.dataset.skin === button.dataset.preview) return;
+        selectChoice(skinButtons, button);
+        stage.dataset.skin = button.dataset.preview;
+        const [edition, caption] = skins[stage.dataset.skin];
+        skinEdition.textContent = edition;
+        skinName.textContent = button.textContent;
+        skinCaption.textContent = caption;
+      });
+    }
+  </script>
+</body>
+</html>
